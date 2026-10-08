@@ -1,0 +1,49 @@
+name: Build zhenguojian APK
+
+on:
+  workflow_dispatch: # 允许手动触发
+  push:
+    branches: [ main ] # 当向 main 分支推送代码时也自动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python deps
+        run: pip install --upgrade pip
+
+      - name: Build zhenguojian all-sources APK
+        run: python3 scripts/build_android.py --all-sources
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: zhenguojian-apks
+          path: dist/android/
+          retention-days: 7
